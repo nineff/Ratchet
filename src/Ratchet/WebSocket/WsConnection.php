@@ -9,6 +9,13 @@ use Ratchet\RFC6455\Messaging\Frame;
  * @property \StdClass $WebSocket
  */
 class WsConnection extends AbstractConnectionDecorator {
+
+    /**
+     * used to keep track of connection latency if keepalive is active
+     * @var float
+     */
+    public $latency = NAN;
+
     /**
      * {@inheritdoc}
      */
@@ -41,5 +48,15 @@ class WsConnection extends AbstractConnectionDecorator {
         $this->getConnection()->close();
 
         $this->WebSocket->closing = true;
+    }
+
+    /**
+     * get the connections last known latency. Requires enableKeepAlive() on the server.
+     * Time starts as NAN and is updated on every received pong, per default every 30s
+     * @return float
+     */
+    public function getLatency()
+    {
+        return $this->latency;
     }
 }

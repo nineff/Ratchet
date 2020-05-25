@@ -202,6 +202,8 @@ class WsServer implements HttpServerInterface {
 
         $this->pongReceiver = function(FrameInterface $frame, $wsConn) use ($pingedConnections, &$lastPing) {
             if ($frame->getPayload() === $lastPing->getPayload()) {
+                $deltaTime = microtime(true) - $wsConn->timer;
+                $wsConn->latency = $deltaTime;
                 $pingedConnections->detach($wsConn);
             }
         };
@@ -216,7 +218,7 @@ class WsServer implements HttpServerInterface {
 
             foreach ($this->connections as $key => $conn) {
                 $wsConn  = $this->connections[$conn]->connection;
-
+                $wsConn->timer= microtime(true);
                 $wsConn->send($lastPing);
                 $pingedConnections->attach($wsConn);
             }
